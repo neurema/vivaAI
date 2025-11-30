@@ -11,45 +11,60 @@ const GROQ_API_KEYS = (process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || 
 
 let currentKeyIndex = 0;
 
-// Rotate through the configured Groq API keys so requests distribute evenly.
+// Rotate through the configured Groq API keys so requests distribute evenly and failover cleanly.
 function getNextApiKey() {
   if (GROQ_API_KEYS.length === 0) {
     throw new Error('GROQ_API_KEY or GROQ_API_KEYS must be set in environment variables');
   }
 
-  const apiKey = GROQ_API_KEYS[currentKeyIndex];
+  const selectedIndex = currentKeyIndex;
+  const apiKey = GROQ_API_KEYS[selectedIndex];
   currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
-  console.log(`Using Groq API key index: ${currentKeyIndex}`);
-  return apiKey;
+  return { apiKey, index: selectedIndex };
 }
 
 async function callGroq(messages) {
-  const apiKey = getNextApiKey();
+  const totalKeys = GROQ_API_KEYS.length;
 
-  try {
-    const response = await axios.post(
-      GROQ_API_URL,
-      {
-        model: MODEL,
-        messages: messages,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      }
-    );
-
-    if (response.data && response.data.choices && response.data.choices.length > 0) {
-      return response.data.choices[0].message.content;
-    } else {
-      throw new Error('No content received from Groq API');
-    }
-  } catch (error) {
-    console.error('Error calling Groq API:', error.response ? error.response.data : error.message);
-    throw error;
+  if (totalKeys === 0) {
+    throw new Error('GROQ_API_KEY or GROQ_API_KEYS must be set in environment variables');
   }
+
+  let lastError;
+
+  for (let attempt = 0; attempt < totalKeys; attempt++) {
+    const { apiKey, index } = getNextApiKey();
+
+    try {
+      console.log(`Using Groq API key index: ${index}`);
+
+      const response = await axios.post(
+        GROQ_API_URL,
+        {
+          model: MODEL,
+          messages: messages,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+        }
+      );
+
+      if (response.data && response.data.choices && response.data.choices.length > 0) {
+        return response.data.choices[0].message.content;
+      }
+
+      throw new Error('No content received from Groq API');
+    } catch (error) {
+      lastError = error;
+      const errorMessage = error.response ? error.response.data : error.message;
+      console.error(`Error calling Groq API with key index ${index}:`, errorMessage);
+    }
+  }
+
+  throw lastError || new Error('Failed to call Groq API with the configured keys');
 }
 
 module.exports = { callGroq };
