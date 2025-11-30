@@ -1,14 +1,30 @@
 const axios = require('axios');
 require('dotenv').config();
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
-async function callGroq(messages) {
-  if (!GROQ_API_KEY) {
-    throw new Error('GROQ_API_KEY is not set in environment variables');
+const GROQ_API_KEYS = (process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || '')
+  .split(/[\s,]+/)
+  .map((key) => key.trim())
+  .filter(Boolean);
+
+let currentKeyIndex = 0;
+
+// Rotate through the configured Groq API keys so requests distribute evenly.
+function getNextApiKey() {
+  if (GROQ_API_KEYS.length === 0) {
+    throw new Error('GROQ_API_KEY or GROQ_API_KEYS must be set in environment variables');
   }
+
+  const apiKey = GROQ_API_KEYS[currentKeyIndex];
+  currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
+  console.log(`Using Groq API key index: ${currentKeyIndex}`);
+  return apiKey;
+}
+
+async function callGroq(messages) {
+  const apiKey = getNextApiKey();
 
   try {
     const response = await axios.post(
@@ -20,7 +36,7 @@ async function callGroq(messages) {
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
         },
       }
     );
