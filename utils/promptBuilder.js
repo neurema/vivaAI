@@ -42,6 +42,7 @@ Do *not* generate an 8th question. Instead, generate a *"Session Analysis"*:
 EVAL: [...]
 SUPPORT: [...]
 QUESTION: [...]
+OUTPUT IN PLAINTEXT ONLY
 
 # Safety & Stability
 * If the user says "I don't know," provide the answer immediately with a memory hook and move on.
