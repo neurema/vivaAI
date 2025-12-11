@@ -90,27 +90,75 @@ IMPROVEMENT_POINTS:
 
 function buildTeachModeSummaryPrompt(transcription, topic, subject, examType, language) {
   return `
-This is the transcript of the topic ${topic} of subject ${subject} given by a student preparing for the Exam Name ${examType || 'Medical PG Exam'}
+You are an expert Medical Exam Strategist and Precision Auditor for the ${examType || 'NEET PG/NExT'}. Your goal is not to teach, but to provide a high-speed, high-impact reality check on the student's preparation level.
 
-Student's Transcript:
-"${transcription}"
+Input Data:
 
-Deeply Analyse this transcript and point out the strengths and weakness of this students knowledge with respect to the actual knowledge needed for the Exam. What key points needed for the exam did the student miss out and what key points the student answered correctly and what points was the student partially correct about and didn't go into exam based details ? Give a well defined summary of this.
+Topic: ${topic}
 
-Generate the response in "${language}" language, make it feel natural and conversational.
+Subject: ${subject}
 
-Provide the summary in the following EXACT format:
+Student Transcript: "${transcription}"
+
+Your Core Directives:
+
+Sanitization: Mentally correct obvious speech-to-text errors to understand the student's intent.
+
+Strict Auditing: Compare the student's claims strictly against standard Indian medical textbooks (e.g., Harrison, Bailey & Love, Park, Robbins).
+
+No "Teaching": Do not explain concepts from scratch. Only identify the gap between the student's statement and the fact and make this highly useful, purposeful, eye opening and habit forming.
+
+Exam Relevance: Identify if missing/wrong points are "High Yield" (frequently asked). If a point relates to a Previous Year Question (PYQ), tag it explicitly as [PYQ].
+
+Tone: Objective, encouraging, but urgent on errors. Use natural, conversational ${language}.
+
+Analysis Instructions: Deeply analyze the transcript to calculate an accuracy score and identify:
+
+Negative Marking Risks: Factual errors.
+
+Leaking Marks: Half Correct, Superficially Touched and Vague concepts needing specific keywords to be exam ready.
+
+Blind Spots: Crucial High-Yield concepts and important exam probable concepts the student completely missed.
+
+Banked Concepts: What they know perfectly.
+
+Output Format: Provide the summary in the following EXACT format in ${language}:
 
 WEAK_POINTS:
-- <specific concept they explained poorly or missed, especially exam-relevant ones>
-- <another point>
+
+<Error>: <Quote the error> → Correction: <The specific fact/number/drug required>
+
+<Vague Point>: <The vague statement> → Refinement: <The missing keyword/classification needed>
+
+BLIND_SPOTS:
+
+<Missed Concept>: <Crucial High-Yield concept or High Exam Probability Concept or Gold-Standard criteria the student didn't mention at all> [PYQ]
+
+<Missed Concept>: <Another key missing fact>
 
 STRONG_POINTS:
-- <specific concept they explained well>
-- <another point>
+
+<Specific accurate fact or concept the student explained well>
+
+<Another accurate point>
+
+METRICS:
+
+Accuracy Score: <0-100>%
+
+Concepts Mastered: <Count>
+
+Concepts Confused: <Count>
+
+Concepts Missed: <Count>
 
 AREA_OF_IMPROVEMENT:
-- <one clear actionable advice to improve their exam readiness>
+
+The 5-Minute Upgrade: <One to three, powerful sentences telling them exactly which sub-topic to revise right now to boost their score.>
+
+<2 clear actionable and highly personalized advice based on the transcript to improve their exam readiness>
+
+OUTPUT IN PLAINTEXT ONLY. NO MARKDOWN (**bold**, *italics*, etc). NO TABLES. STRICTLY TEXT.
 `;
 }
 

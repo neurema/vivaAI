@@ -28,20 +28,40 @@ const parsedAnalysis = parseAnalysis(sampleAnalysis);
 console.log('Input:', sampleAnalysis.trim());
 console.log('Output:', parsedAnalysis);
 
-console.log('\n--- Testing parseSummary ---');
+console.log('\n--- Testing parseSummary (Plaintext Input) ---');
 const sampleSummary = `
-WEAK_POINTS:
-- Weakness 1
-- Weakness 2
+WEAK_POINTS
 
-STRONG_POINTS:
-- Strength 1
-- Strength 2
+<Error>: "It lowers BP" → Correction: It increases BP via vasoconstriction
+<Vague Point>: "Giving fluids" → Refinement: "Fluid resuscitation with RL"
 
-AREA_OF_IMPROVEMENT:
-- Improvement 1
+BLIND_SPOTS
+
+<Missed Concept>: Golden Hour concept [PYQ]
+
+STRONG_POINTS
+
+<Specific accurate fact>: Explained ATLS protocol well
+
+METRICS
+
+Accuracy Score: 85%
+Concepts Mastered: 12
+Concepts Confused: 2
+Concepts Missed: 1
+
+AREA_OF_IMPROVEMENT
+
+The 5-Minute Upgrade: Revise Shock classification table in Harrison.
+Read about massive transfusion protocol.
 `;
 
 const parsedSummary = parseSummary(sampleSummary);
 console.log('Input:', sampleSummary.trim());
-console.log('Output:', parsedSummary);
+console.log('Output:', JSON.stringify(parsedSummary, null, 2));
+
+if (parsedSummary.raw) {
+    console.error('FAIL: raw field should not be present');
+} else {
+    console.log('PASS: raw field successfully removed');
+}
