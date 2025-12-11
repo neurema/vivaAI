@@ -87,9 +87,37 @@ IMPROVEMENT_POINTS:
 `;
 }
 
+
+function buildTeachModeSummaryPrompt(transcription, topic, subject, examType, language) {
+  return `
+This is the transcript of the topic ${topic} of subject ${subject} given by a student preparing for the Exam Name ${examType || 'Medical PG Exam'}
+
+Student's Transcript:
+"${transcription}"
+
+Deeply Analyse this transcript and point out the strengths and weakness of this students knowledge with respect to the actual knowledge needed for the Exam. What key points needed for the exam did the student miss out and what key points the student answered correctly and what points was the student partially correct about and didn't go into exam based details ? Give a well defined summary of this.
+
+Generate the response in "${language}" language, make it feel natural and conversational.
+
+Provide the summary in the following EXACT format:
+
+WEAK_POINTS:
+- <specific concept they explained poorly or missed, especially exam-relevant ones>
+- <another point>
+
+STRONG_POINTS:
+- <specific concept they explained well>
+- <another point>
+
+AREA_OF_IMPROVEMENT:
+- <one clear actionable advice to improve their exam readiness>
+`;
+}
+
 module.exports = {
   buildSystemPrompt,
   buildStartPrompt,
   buildAnswerPrompt,
-  buildAnalysisPrompt
+  buildAnalysisPrompt,
+  buildTeachModeSummaryPrompt
 };

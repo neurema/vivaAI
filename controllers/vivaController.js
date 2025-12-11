@@ -99,27 +99,16 @@ exports.analyzeViva = async (req, res) => {
 
 exports.summarizeTeachSession = async (req, res) => {
   try {
-    const { transcription, topic } = req.body;
+    const { transcription, topic, subject, examType, language } = req.body;
 
     if (!transcription || !topic) {
       return res.status(400).json({ error: 'Missing required fields: transcription and topic' });
     }
 
-    const messages = [];
-    messages.push({ role: 'system', content: buildSystemPrompt() }); // Re-using system prompt or maybe should be generic? 
-    // Actually promptBuilder says "You are NEM AI, a human-like academic examiner..." which might conflict or be irrelevant.
-    // But `buildTeachModeSummaryPrompt` is a standalone prompt? 
-    // Wait, `callGroq` takes messages. 
-    // `buildTeachModeSummaryPrompt` returns a string.
-    // I should probably make a new single-shot message for this, or use the existing system prompt?
-    // The `buildTeachModeSummaryPrompt` says "You are an expert academic evaluator..."
-    // So I should probably just use that as the system message or user message?
-    // Let's just pass it as a user message, or system message overriding the default?
-    // Let's use a fresh conversation history.
-
-    // Changing approach: detailed prompt is self-contained.
-    const prompt = buildTeachModeSummaryPrompt(transcription, topic);
+    const prompt = buildTeachModeSummaryPrompt(transcription, topic, subject, examType, language);
     const summaryMessages = [{ role: 'user', content: prompt }];
+
+    console.log('Generating summary for topic:', topic);
 
     const responseContent = await callGroq(summaryMessages);
     const parsed = parseSummary(responseContent);
