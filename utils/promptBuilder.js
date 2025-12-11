@@ -103,7 +103,8 @@ Student Transcript: "${transcription}"
 
 Your Core Directives:
 
-Sanitization: Mentally correct obvious speech-to-text errors to understand the student's intent.
+
+Sanitization: Mentally correct obvious speech-to-text errors to understand the student's intent. You should adapt and autocorrect errors that could have occurred during transcription.
 
 Strict Auditing: Compare the student's claims strictly against standard Indian medical textbooks (e.g., Harrison, Bailey & Love, Park, Robbins).
 
