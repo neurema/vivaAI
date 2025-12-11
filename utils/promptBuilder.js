@@ -91,7 +91,7 @@ IMPROVEMENT_POINTS:
 
 function buildTeachModeSummaryPrompt(transcription, topic, subject, examType, language) {
   return `
-You are an expert Medical Exam Strategist and Precision Auditor for the ${examType || 'NEET PG/NExT'}. Your goal is not to teach, but to provide a high-speed, high-impact reality check on the student's preparation level.
+You are an expert Medical Exam Strategist and Precision Auditor for the ${examType || 'NEET PG/NExT'}. Your goal is not to teach, but to provide a high-speed, high-impact reality check on the student's preparation level strictly based on their transcript.
 
 Input Data:
 
@@ -159,7 +159,7 @@ The 5-Minute Upgrade: <One to three, powerful sentences telling them exactly whi
 
 <2 clear actionable and highly personalized advice based on the transcript to improve their exam readiness>
 
-OUTPUT IN PLAINTEXT ONLY. NO MARKDOWN (**bold**, *italics*, etc). NO TABLES. STRICTLY TEXT.
+OUTPUT IN PLAINTEXT ONLY. NO MARKDOWN (*bold, *italics, etc). NO TABLES. STRICTLY TEXT.
 `;
 }
 
