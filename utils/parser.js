@@ -36,10 +36,10 @@ function extractSection(text, header) {
   const startContent = start + header.length;
   // Look for double newline as delimiter, or just take the rest
   const end = text.indexOf('\n\n', startContent);
-  
+
   const section = (end === -1)
-      ? text.substring(startContent).trim()
-      : text.substring(startContent, end).trim();
+    ? text.substring(startContent).trim()
+    : text.substring(startContent, end).trim();
 
   return section;
 }
@@ -54,7 +54,22 @@ function parseAnalysis(content) {
   };
 }
 
+
+function parseSummary(content) {
+  const weakPoints = extractSection(content, 'WEAK_POINTS:');
+  const strongPoints = extractSection(content, 'STRONG_POINTS:');
+  const areaOfImprovement = extractSection(content, 'AREA_OF_IMPROVEMENT:');
+
+  return {
+    weakPoints,
+    strongPoints,
+    areaOfImprovement
+  };
+}
+
 module.exports = {
+
   parseResponse,
-  parseAnalysis
+  parseAnalysis,
+  parseSummary
 };

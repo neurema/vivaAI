@@ -1,4 +1,4 @@
-const { parseResponse, parseAnalysis } = require('./parser');
+const { parseResponse, parseAnalysis, parseSummary } = require('./parser');
 
 console.log('--- Testing parseResponse ---');
 const sampleResponse = `
@@ -27,3 +27,21 @@ IMPROVEMENT_POINTS:
 const parsedAnalysis = parseAnalysis(sampleAnalysis);
 console.log('Input:', sampleAnalysis.trim());
 console.log('Output:', parsedAnalysis);
+
+console.log('\n--- Testing parseSummary ---');
+const sampleSummary = `
+WEAK_POINTS:
+- Weakness 1
+- Weakness 2
+
+STRONG_POINTS:
+- Strength 1
+- Strength 2
+
+AREA_OF_IMPROVEMENT:
+- Improvement 1
+`;
+
+const parsedSummary = parseSummary(sampleSummary);
+console.log('Input:', sampleSummary.trim());
+console.log('Output:', parsedSummary);
