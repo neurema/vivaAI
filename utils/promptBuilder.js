@@ -144,11 +144,11 @@ STRONG_POINTS:
 
 <Another accurate point>
 
-METRICS:
+METRICS (all metrics are strictly numeric, no text, perccentage is allowed but no description or any other text) :
 
 Accuracy Score: <0-100>%
 
-Concepts Mastered: <Count>
+Concepts Mastered: <Count> 
 
 Concepts Confused: <Count>
 
