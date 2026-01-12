@@ -17,7 +17,7 @@ exports.startViva = async (req, res) => {
     }
 
     const messages = [];
-    messages.push({ role: 'system', content: buildSystemPrompt() });
+    messages.push({ role: 'system', content: buildSystemPrompt(examType) });
     messages.push({
       role: 'user',
       content: buildStartPrompt({ examType, subject, topic, revisionRound, revisionCount })
