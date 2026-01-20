@@ -60,22 +60,18 @@ const GROQ_API_KEYS = (process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || 
 
 let currentKeyIndex = 0;
 let lastKeyChangeTime = Date.now();
-const KEY_STICKY_DURATION_MS = 60000; // Stick to same key for 1 minute for cache continuity
+// KEY_STICKY_DURATION_MS removed for round-robin
 
-// Get API key with sticky selection for cache continuity
-// Only rotates after sticky duration or on rate limit
+
+// Get API key with strict round-robin selection
 function getNextApiKey(forceRotate = false) {
   if (GROQ_API_KEYS.length === 0) {
     throw new Error('GROQ_API_KEY or GROQ_API_KEYS must be set in environment variables');
   }
 
-  const now = Date.now();
-
-  // Rotate key if forced (rate limit) or sticky duration expired
-  if (forceRotate || (now - lastKeyChangeTime > KEY_STICKY_DURATION_MS)) {
-    currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
-    lastKeyChangeTime = now;
-  }
+  // Always rotate to the next key for round-robin distribution
+  // We use atomic increment to ensure distribution across requests
+  currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
 
   const apiKey = GROQ_API_KEYS[currentKeyIndex];
   return { apiKey, index: currentKeyIndex };
@@ -166,11 +162,18 @@ function logTokenUsage(context, usage) {
     ? Math.round((cachedTokens / usage.prompt_tokens) * 100)
     : 0;
 
-  console.log(`📊 [${context}] Token Usage:`);
-  console.log(`   ├─ Prompt: ${usage.prompt_tokens}`);
+  console.log(`📊 [${context}] Usage & Cost:`);
 
-  console.log(`   ├─ Completion: ${usage.completion_tokens}`);
-  console.log(`   └─ Total: ${usage.total_tokens}`);
+  // Calculate specific costs for this call
+  const costInfo = calculateCost(usage.prompt_tokens, usage.completion_tokens, cachedTokens);
+
+  console.log(`   Input (Prompt):      ${usage.prompt_tokens} tokens | Cost: $${costInfo.inputCost.toFixed(6)}`);
+  console.log(`   Output (Completion): ${usage.completion_tokens} tokens | Cost: $${costInfo.outputCost.toFixed(6)}`);
+  console.log(`   --------------------------------------------------`);
+  console.log(`   Total:               ${usage.total_tokens} tokens | Cost: $${costInfo.totalCost.toFixed(6)}`);
+  if (costInfo.savings > 0) {
+    console.log(`   Savings (Cache):     $${costInfo.savings.toFixed(6)}`);
+  }
 
   // Track for cumulative stats
   trackTokenUsage(context, usage);
@@ -239,13 +242,10 @@ async function callGroq(messages, options = {}) {
 
         // Handle rate limiting (429)
         if (statusCode === 429) {
-          const delayMs = BASE_DELAY_MS * Math.pow(2, retry); // Exponential backoff: 2s, 4s, 8s
-          const retryAfter = error.response?.headers?.['retry-after'];
-          const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : delayMs;
-
-          console.warn(`⚠️ Rate limited (429). Waiting ${waitTime / 1000}s before retry...`);
-          await new Promise(r => setTimeout(r, waitTime));
-          continue; // Retry with same key
+          console.warn(`⚠️ Rate limited (429) on key index ${index}. Switching to next key immediately...`);
+          // Break inner retry loop to let outer loop try next key
+          lastError = error; // Ensure this error is captured if it's the last one
+          break;
         }
 
         console.error(`❌ Error calling Groq API with key index ${index}:`, errorMessage);
