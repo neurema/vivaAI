@@ -363,9 +363,18 @@ function buildSystemPrompt(examType, context = {}) {
     prompt = SYSTEM_PROMPT_FMGE;
   }
 
-  // --- CACHE OPTIMIZATION: Include context in system prompt ---
-  // By including subject/topic in the system prompt, we maximize the cached prefix
-  // The entire system message becomes the cached portion for all turns in the session
+  // FORCE NO CACHE: Append a unique timestamp to the system prompt
+  // This ensures the prompt prefix is never identical, preventing cache hits.
+  prompt += `\n\n<!-- Cache Buster: ${Date.now()} -->`;
+
+  return prompt;
+}
+
+function buildStartPrompt(context = {}) {
+  let prompt = `Begin the viva. Ask ONLY Q1 now.
+Use format: EVAL:, SUPPORT:, QUESTION:`;
+
+  // Start Prompt Context (Moved from System Prompt to avoid caching specific user details in system prompt)
   if (context.subject || context.topic) {
     prompt += `
 
@@ -379,12 +388,6 @@ User Revision Count: ${context.revisionCount || 0}
   }
 
   return prompt;
-}
-
-function buildStartPrompt() {
-  // Minimal start prompt - context is now in system message for caching
-  return `Begin the viva. Ask ONLY Q1 now.
-Use format: EVAL:, SUPPORT:, QUESTION:`;
 }
 
 function buildAnswerPrompt(userAnswer) {

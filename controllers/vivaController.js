@@ -16,16 +16,14 @@ exports.startViva = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // --- CACHE OPTIMIZATION: Include context in system prompt ---
-    // By putting subject/topic in the system message, it becomes part of the cached prefix
-    // All subsequent turns in this session will reuse this cached system message
+    // --- CONTEXT IN START PROMPT ---
     const context = { subject, topic, revisionRound, revisionCount };
 
     const messages = [];
-    messages.push({ role: 'system', content: buildSystemPrompt(examType, context) });
+    messages.push({ role: 'system', content: buildSystemPrompt(examType) });
     messages.push({
       role: 'user',
-      content: buildStartPrompt()
+      content: buildStartPrompt(context)
     });
 
     const { content: responseContent } = await callGroq(messages, { context: 'Start Viva' });
@@ -52,10 +50,7 @@ exports.answerQuestion = async (req, res) => {
       return res.status(400).json({ error: 'Invalid input: messages array and userAnswer required' });
     }
 
-    // --- CACHE-OPTIMIZED: Keep consistent growing message array ---
-    // Groq prompt caching requires EXACT prefix match.
-    // Sliding window was breaking cache by changing the prefix each turn.
-    // Now we send the full history to maintain the same prefix.
+    // We send the full history to maintain context.
 
     // Clone the messages array and add the new user answer
     const groqMessages = [...messages];

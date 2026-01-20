@@ -5,13 +5,8 @@ require('dotenv').config();
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
-const PROMPT_CACHING_MODELS = [
-  'moonshotai/kimi-k2-instruct-0905',
-  'openai/gpt-oss-20b',
-  'openai/gpt-oss-120b',
-  'openai/gpt-oss-safeguard-20b'
-];
-const PROMPT_CACHING_ENABLED = PROMPT_CACHING_MODELS.includes(MODEL);
+const PROMPT_CACHING_MODELS = [];
+const PROMPT_CACHING_ENABLED = false;
 
 // --- PRICING CONFIGURATION (per million tokens) ---
 // Official Groq pricing. Cached tokens get 50% discount.
@@ -173,9 +168,7 @@ function logTokenUsage(context, usage) {
 
   console.log(`📊 [${context}] Token Usage:`);
   console.log(`   ├─ Prompt: ${usage.prompt_tokens}`);
-  if (cachedTokens > 0) {
-    console.log(`   ├─ Cached: ${cachedTokens} (🟢 ${cacheHitRate}% cache hit)`);
-  }
+
   console.log(`   ├─ Completion: ${usage.completion_tokens}`);
   console.log(`   └─ Total: ${usage.total_tokens}`);
 
