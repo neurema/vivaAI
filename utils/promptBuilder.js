@@ -382,7 +382,12 @@ Use format: EVAL:, SUPPORT:, QUESTION:
 
 function buildAnswerPrompt(userAnswer) {
   const trimmed = userAnswer.trim();
-  return `Answer: ${trimmed}\nEvaluate using EVAL:, SUPPORT:, QUESTION:. If Q6 done → QUESTION: FINISHED.`;
+  return `Answer: ${trimmed}
+
+CRITICAL INSTRUCTION:
+- Output ONLY using format: EVAL: [...] SUPPORT: [...] QUESTION: [...]
+- NO introductory text. NO markdown. NO preamble.
+- If Q12 done → QUESTION: FINISHED.`;
 }
 
 function buildAnalysisPrompt() {

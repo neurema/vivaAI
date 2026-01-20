@@ -47,14 +47,30 @@ exports.answerQuestion = async (req, res) => {
       return res.status(400).json({ error: 'Invalid input: messages array and userAnswer required' });
     }
 
-    // Append user answer
-    const newMessages = [...messages];
-    newMessages.push({
+    // --- TOKEN OPTIMIZATION: Sliding Window Context ---
+    // Keep System Prompt (index 0) and Exam Context (index 1)
+    const systemMessage = messages[0];
+    const contextMessage = messages.length > 1 ? messages[1] : null;
+
+    // Slice the LAST 4 messages (approx 2 turns: Q, A, Q, A)
+    const recentHistory = messages.slice(-4);
+
+    // Construct optimized payload for Groq
+    const optimizedMessages = contextMessage
+      ? [systemMessage, contextMessage, ...recentHistory]
+      : [systemMessage, ...recentHistory];
+
+    // Add the new user answer to the optimized payload for Groq
+    optimizedMessages.push({
       role: 'user',
       content: buildAnswerPrompt(userAnswer)
     });
 
-    const responseContent = await callGroq(newMessages);
+    const responseContent = await callGroq(optimizedMessages);
+
+    // Append to FULL history for client-side state management
+    const newMessages = [...messages];
+    newMessages.push({ role: 'user', content: buildAnswerPrompt(userAnswer) });
     newMessages.push({ role: 'assistant', content: responseContent });
 
     const parsed = parseResponse(responseContent);
@@ -78,14 +94,23 @@ exports.analyzeViva = async (req, res) => {
       return res.status(400).json({ error: 'Invalid input: messages array required' });
     }
 
-    const newMessages = [...messages];
-    newMessages.push({
+    // --- TOKEN OPTIMIZATION: Compressed Analysis ---
+    // Truncate very long student answers to save tokens
+    const MAX_CONTENT_LENGTH = 500;
+    const compressedMessages = messages.map(msg => {
+      const content = msg.content || '';
+      if (msg.role === 'user' && content.length > MAX_CONTENT_LENGTH) {
+        return { role: msg.role, content: content.substring(0, MAX_CONTENT_LENGTH) + '...[truncated]' };
+      }
+      return { role: msg.role, content: content };
+    });
+
+    compressedMessages.push({
       role: 'user',
       content: buildAnalysisPrompt()
     });
 
-    const responseContent = await callGroq(newMessages);
-    // We don't necessarily need to return the messages history for analysis, just the result
+    const responseContent = await callGroq(compressedMessages);
 
     const analysis = parseAnalysis(responseContent);
 
