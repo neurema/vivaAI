@@ -7,6 +7,11 @@
  */
 
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+
+const LOG_FILE = path.join(__dirname, 'token_usage_log.txt');
+
 
 const BASE_URL = process.env.VIVA_API_URL || 'http://localhost:7981/api';
 const NUM_SESSIONS = parseInt(process.argv[2]) || 1;
@@ -150,26 +155,32 @@ async function fetchStats() {
     }
 }
 
+function logAndFile(message) {
+    console.log(message);
+    fs.appendFileSync(LOG_FILE, message + '\n');
+}
+
 function printStatsTable(stats) {
-    console.log(`\n${'═'.repeat(90)}`);
-    console.log('📊 TOKEN USAGE & BILLING STATISTICS');
-    console.log(`${'═'.repeat(90)}`);
+    const lines = [];
+    lines.push(`\n${'═'.repeat(90)}`);
+    lines.push('📊 TOKEN USAGE & BILLING STATISTICS');
+    lines.push(`${'═'.repeat(90)}`);
 
     // Model and caching info
-    console.log(`\n🤖 Model: ${stats.currentModel}`);
+    lines.push(`\n🤖 Model: ${stats.currentModel}`);
     if (stats.pricing) {
-        console.log(`💰 Pricing: $${stats.pricing.input}/M input, $${stats.pricing.output}/M output`);
+        lines.push(`💰 Pricing: $${stats.pricing.input}/M input, $${stats.pricing.output}/M output`);
     }
     if (stats.promptCachingEnabled) {
-        console.log(`✅ Prompt Caching: ENABLED (50% discount on cached tokens)`);
+        lines.push(`✅ Prompt Caching: ENABLED (50% discount on cached tokens)`);
     } else {
-        console.log(`⚠️  Prompt Caching: NOT AVAILABLE for this model`);
-        console.log(`   Supported models: moonshotai/kimi-k2-instruct-0905, openai/gpt-oss-*`);
+        lines.push(`⚠️  Prompt Caching: NOT AVAILABLE for this model`);
+        lines.push(`   Supported models: moonshotai/kimi-k2-instruct-0905, openai/gpt-oss-*`);
     }
 
-    console.log('\n┌────────────────────────┬────────┬────────┬────────┬────────┬────────┬────────┬──────────┐');
-    console.log('│ Context                │ Calls  │ Prompt │ Cached │ Compl  │ Total  │ Cache% │ Cost USD │');
-    console.log('├────────────────────────┼────────┼────────┼────────┼────────┼────────┼────────┼──────────┤');
+    lines.push('\n┌────────────────────────┬────────┬────────┬────────┬────────┬────────┬────────┬──────────┐');
+    lines.push('│ Context                │ Calls  │ Prompt │ Cached │ Compl  │ Total  │ Cache% │ Cost USD │');
+    lines.push('├────────────────────────┼────────┼────────┼────────┼────────┼────────┼────────┼──────────┤');
 
     for (const [ctx, data] of Object.entries(stats.byContext)) {
         const ctxName = ctx.substring(0, 22).padEnd(22);
@@ -180,19 +191,19 @@ function printStatsTable(stats) {
         const total = String(data.total_tokens).padStart(6);
         const cacheRate = String((data.cacheHitRate || 0) + '%').padStart(6);
         const cost = ('$' + (data.costUSD || 0).toFixed(6)).padStart(9);
-        console.log(`│ ${ctxName} │${calls} │${prompt} │${cached} │${compl} │${total} │${cacheRate} │${cost} │`);
+        lines.push(`│ ${ctxName} │${calls} │${prompt} │${cached} │${compl} │${total} │${cacheRate} │${cost} │`);
     }
 
-    console.log('├────────────────────────┼────────┼────────┼────────┼────────┼────────┼────────┼──────────┤');
+    lines.push('├────────────────────────┼────────┼────────┼────────┼────────┼────────┼────────┼──────────┤');
     const t = stats.total;
     const totalCached = String(t.cached_tokens || 0).padStart(6);
     const totalCacheRate = String((t.cacheHitRate || 0) + '%').padStart(6);
     const totalCost = ('$' + (t.costUSD || 0).toFixed(6)).padStart(9);
-    console.log(`│ ${'TOTAL'.padEnd(22)} │${String(t.calls).padStart(6)} │${String(t.prompt_tokens).padStart(6)} │${totalCached} │${String(t.completion_tokens).padStart(6)} │${String(t.total_tokens).padStart(6)} │${totalCacheRate} │${totalCost} │`);
-    console.log('└────────────────────────┴────────┴────────┴────────┴────────┴────────┴────────┴──────────┘');
+    lines.push(`│ ${'TOTAL'.padEnd(22)} │${String(t.calls).padStart(6)} │${String(t.prompt_tokens).padStart(6)} │${totalCached} │${String(t.completion_tokens).padStart(6)} │${String(t.total_tokens).padStart(6)} │${totalCacheRate} │${totalCost} │`);
+    lines.push('└────────────────────────┴────────┴────────┴────────┴────────┴────────┴────────┴──────────┘');
 
     // Cost summary
-    console.log(`
+    lines.push(`
 💵 BILLING SUMMARY:
    ┌─────────────────────────────────────────────────┐
    │ Total Cost (with caching):     $${(t.costUSD || 0).toFixed(6).padStart(10)}  │
@@ -207,9 +218,14 @@ function printStatsTable(stats) {
    • Avg Total Tokens/Call:      ${t.avgTotal}
    • Overall Cache Hit Rate:     ${t.cacheHitRate || 0}%
 `);
+
+    lines.forEach(line => logAndFile(line));
 }
 
 async function main() {
+    // Initialize log file
+    fs.writeFileSync(LOG_FILE, `VIVA AI TOKEN USAGE LOG\nRun Date: ${new Date().toISOString()}\n\n`);
+
     console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║          VIVA AI - AUTOMATED FLOW TESTER                   ║
@@ -219,6 +235,7 @@ async function main() {
 🎯 Sessions to run: ${NUM_SESSIONS}
 🔗 API Base URL: ${BASE_URL}
 📝 Questions per session: ${QUESTIONS_PER_SESSION}
+📁 Log File: ${LOG_FILE}
 `);
 
     // Reset stats before starting
@@ -243,20 +260,22 @@ async function main() {
     }
 
     // Summary Report
-    console.log(`${'═'.repeat(70)}`);
-    console.log('� SESSION SUMMARY');
-    console.log(`${'═'.repeat(70)}`);
+    const summaryLines = [];
+    summaryLines.push(`${'═'.repeat(70)}`);
+    summaryLines.push('🚀 SESSION SUMMARY');
+    summaryLines.push(`${'═'.repeat(70)}`);
 
     const successfulSessions = sessionResults.filter(r => r.success).length;
     const totalQuestions = sessionResults.reduce((sum, r) => sum + r.questionsAnswered, 0);
 
-    console.log(`
+    summaryLines.push(`
 Sessions Run:        ${NUM_SESSIONS}
 Successful:          ${successfulSessions}
 Failed:              ${NUM_SESSIONS - successfulSessions}
 Total Questions:     ${totalQuestions}
 Avg Q/Session:       ${(totalQuestions / successfulSessions || 0).toFixed(1)}
 `);
+    summaryLines.forEach(line => logAndFile(line));
 }
 
 main().catch(console.error);

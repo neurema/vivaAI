@@ -1,0 +1,46 @@
+VIVA AI TOKEN USAGE LOG
+Run Date: 2026-01-20T11:26:49.134Z
+
+
+══════════════════════════════════════════════════════════════════════════════════════════
+📊 TOKEN USAGE & BILLING STATISTICS
+══════════════════════════════════════════════════════════════════════════════════════════
+
+🤖 Model: openai/gpt-oss-20b:free
+⚠️  Prompt Caching: NOT AVAILABLE for this model
+   Supported models: moonshotai/kimi-k2-instruct-0905, openai/gpt-oss-*
+
+┌────────────────────────┬────────┬────────┬────────┬────────┬────────┬────────┬──────────┐
+│ Context                │ Calls  │ Prompt │ Cached │ Compl  │ Total  │ Cache% │ Cost USD │
+├────────────────────────┼────────┼────────┼────────┼────────┼────────┼────────┼──────────┤
+│ Start Viva             │     1 │   909 │     0 │   469 │  1378 │    0% │$0.000000 │
+│ Answer Question        │    12 │ 14867 │     0 │  2854 │ 17721 │    0% │$0.000000 │
+│ Analyze Viva           │     1 │   588 │     0 │   278 │   866 │    0% │$0.000000 │
+├────────────────────────┼────────┼────────┼────────┼────────┼────────┼────────┼──────────┤
+│ TOTAL                  │    14 │ 16364 │     0 │  3601 │ 19965 │    0% │$0.000000 │
+└────────────────────────┴────────┴────────┴────────┴────────┴────────┴────────┴──────────┘
+
+💵 BILLING SUMMARY:
+   ┌─────────────────────────────────────────────────┐
+   │ Total Cost (with caching):     $  0.000000  │
+   │ Cost without caching:          $  0.000000  │
+   │ Savings from caching:          $  0.000000  │
+   │ Cost per Viva Session:         $  0.000000  │
+   └─────────────────────────────────────────────────┘
+
+📈 TOKEN AVERAGES:
+   • Avg Prompt Tokens/Call:     undefined
+   • Avg Completion Tokens/Call: undefined
+   • Avg Total Tokens/Call:      undefined
+   • Overall Cache Hit Rate:     0%
+
+══════════════════════════════════════════════════════════════════════
+🚀 SESSION SUMMARY
+══════════════════════════════════════════════════════════════════════
+
+Sessions Run:        1
+Successful:          1
+Failed:              0
+Total Questions:     12
+Avg Q/Session:       12.0
+

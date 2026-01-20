@@ -367,6 +367,9 @@ function buildSystemPrompt(examType, context = {}) {
   // This ensures the prompt prefix is never identical, preventing cache hits.
   prompt += `\n\n<!-- Cache Buster: ${Date.now()} -->`;
 
+  // Constraints to prevent output explosion
+  prompt += `\n\nConstraints: Max 100 words per turn. Do not summarize previous questions. Be concise.`;
+
   return prompt;
 }
 

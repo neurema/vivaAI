@@ -1,4 +1,4 @@
-const { callGroq, transcribeAudio, getTokenStats, resetTokenStats } = require('../utils/groqClient');
+const { callLLM, transcribeAudio, getTokenStats, resetTokenStats } = require('../utils/llmClient');
 const {
   buildSystemPrompt,
   buildStartPrompt,
@@ -26,7 +26,7 @@ exports.startViva = async (req, res) => {
       content: buildStartPrompt(context)
     });
 
-    const { content: responseContent } = await callGroq(messages, { context: 'Start Viva' });
+    const { content: responseContent } = await callLLM(messages, { context: 'Start Viva' });
     messages.push({ role: 'assistant', content: responseContent });
 
     const parsed = parseResponse(responseContent);
@@ -59,7 +59,27 @@ exports.answerQuestion = async (req, res) => {
       content: buildAnswerPrompt(userAnswer)
     });
 
-    const { content: responseContent } = await callGroq(groqMessages, { context: 'Answer Question' });
+    // --- SLIDING WINDOW FIX ---
+    // 1. Grab the permanent System Prompt (Index 0)
+    const systemMsg = groqMessages[0];
+
+    // 2. Grab the Exam Context (Index 1) - e.g. "Topic is Thermodynamics"
+    const contextMsg = groqMessages[1];
+
+    // 3. Grab ONLY the last 2 exchanges (Last 4 messages) from the REST
+    // We strictly skip index 0 & 1, then slice the tail.
+    const rawHistory = groqMessages.slice(2);
+    // If history is small, take it all; otherwise take last 4 items (2 turns)
+    const recentHistory = rawHistory.length > 4 ? rawHistory.slice(-4) : rawHistory;
+
+    // 4. Rebuild the payload for the AI
+    const optimizedHistory = [
+      systemMsg,
+      contextMsg,
+      ...recentHistory
+    ];
+
+    const { content: responseContent } = await callLLM(optimizedHistory, { context: 'Answer Question' });
 
     // Append assistant response for the full history
     groqMessages.push({ role: 'assistant', content: responseContent });
@@ -92,7 +112,7 @@ exports.analyzeViva = async (req, res) => {
     const analysisPrompt = buildAnalysisPrompt(performanceLog, topic, subject, examType);
     const analysisMessages = [{ role: 'user', content: analysisPrompt }];
 
-    const { content: responseContent } = await callGroq(analysisMessages, { context: 'Analyze Viva' });
+    const { content: responseContent } = await callLLM(analysisMessages, { context: 'Analyze Viva' });
     const analysis = parseAnalysis(responseContent);
 
     res.json(analysis);
@@ -116,7 +136,7 @@ exports.summarizeTeachSession = async (req, res) => {
 
     console.log('Generating summary for topic:', topic);
 
-    const { content: responseContent } = await callGroq(summaryMessages, { context: 'Teach Session Summary' });
+    const { content: responseContent } = await callLLM(summaryMessages, { context: 'Teach Session Summary' });
     const parsed = parseSummary(responseContent);
 
     res.json(parsed);
