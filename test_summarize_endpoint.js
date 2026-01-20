@@ -2,7 +2,7 @@ const axios = require('axios');
 
 async function testSummarize() {
     try {
-        const response = await axios.post('http://localhost:3000/api/summarize', {
+        const response = await axios.post('http://localhost:7981/summarize', {
             subject: 'Cardiology',
             topic: 'Heart Failure',
             transcription: 'Heart failure is when the heart cannot pump enough blood to meet the body needs. It can be caused by coronary artery disease or high blood pressure. Symptoms include shortness of breath and fatigue.'

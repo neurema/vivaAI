@@ -1,4 +1,4 @@
-const { callGroq, transcribeAudio } = require('../utils/groqClient');
+const { callGroq, transcribeAudio, getTokenStats, resetTokenStats } = require('../utils/groqClient');
 const {
   buildSystemPrompt,
   buildStartPrompt,
@@ -16,14 +16,19 @@ exports.startViva = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // --- CACHE OPTIMIZATION: Include context in system prompt ---
+    // By putting subject/topic in the system message, it becomes part of the cached prefix
+    // All subsequent turns in this session will reuse this cached system message
+    const context = { subject, topic, revisionRound, revisionCount };
+
     const messages = [];
-    messages.push({ role: 'system', content: buildSystemPrompt(examType) });
+    messages.push({ role: 'system', content: buildSystemPrompt(examType, context) });
     messages.push({
       role: 'user',
-      content: buildStartPrompt({ examType, subject, topic, revisionRound, revisionCount })
+      content: buildStartPrompt()
     });
 
-    const responseContent = await callGroq(messages);
+    const { content: responseContent } = await callGroq(messages, { context: 'Start Viva' });
     messages.push({ role: 'assistant', content: responseContent });
 
     const parsed = parseResponse(responseContent);
@@ -47,36 +52,27 @@ exports.answerQuestion = async (req, res) => {
       return res.status(400).json({ error: 'Invalid input: messages array and userAnswer required' });
     }
 
-    // --- TOKEN OPTIMIZATION: Sliding Window Context ---
-    // Keep System Prompt (index 0) and Exam Context (index 1)
-    const systemMessage = messages[0];
-    const contextMessage = messages.length > 1 ? messages[1] : null;
+    // --- CACHE-OPTIMIZED: Keep consistent growing message array ---
+    // Groq prompt caching requires EXACT prefix match.
+    // Sliding window was breaking cache by changing the prefix each turn.
+    // Now we send the full history to maintain the same prefix.
 
-    // Slice the LAST 4 messages (approx 2 turns: Q, A, Q, A)
-    const recentHistory = messages.slice(-4);
-
-    // Construct optimized payload for Groq
-    const optimizedMessages = contextMessage
-      ? [systemMessage, contextMessage, ...recentHistory]
-      : [systemMessage, ...recentHistory];
-
-    // Add the new user answer to the optimized payload for Groq
-    optimizedMessages.push({
+    // Clone the messages array and add the new user answer
+    const groqMessages = [...messages];
+    groqMessages.push({
       role: 'user',
       content: buildAnswerPrompt(userAnswer)
     });
 
-    const responseContent = await callGroq(optimizedMessages);
+    const { content: responseContent } = await callGroq(groqMessages, { context: 'Answer Question' });
 
-    // Append to FULL history for client-side state management
-    const newMessages = [...messages];
-    newMessages.push({ role: 'user', content: buildAnswerPrompt(userAnswer) });
-    newMessages.push({ role: 'assistant', content: responseContent });
+    // Append assistant response for the full history
+    groqMessages.push({ role: 'assistant', content: responseContent });
 
     const parsed = parseResponse(responseContent);
 
     res.json({
-      messages: newMessages,
+      messages: groqMessages,
       parsed: parsed
     });
 
@@ -88,30 +84,20 @@ exports.answerQuestion = async (req, res) => {
 
 exports.analyzeViva = async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { performanceLog, topic, subject, examType } = req.body;
 
-    if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: 'Invalid input: messages array required' });
+    // --- DUAL-HISTORY STRATEGY: Metadata Log Analysis ---
+    // The client sends a compressed performanceLog instead of full chat history.
+    // Format: [{ q: 1, evaluation: "Correct", topic: "...", userAnswer: "..." }, ...]
+
+    if (!performanceLog || !Array.isArray(performanceLog)) {
+      return res.status(400).json({ error: 'Invalid input: performanceLog array required' });
     }
 
-    // --- TOKEN OPTIMIZATION: Compressed Analysis ---
-    // Truncate very long student answers to save tokens
-    const MAX_CONTENT_LENGTH = 500;
-    const compressedMessages = messages.map(msg => {
-      const content = msg.content || '';
-      if (msg.role === 'user' && content.length > MAX_CONTENT_LENGTH) {
-        return { role: msg.role, content: content.substring(0, MAX_CONTENT_LENGTH) + '...[truncated]' };
-      }
-      return { role: msg.role, content: content };
-    });
+    const analysisPrompt = buildAnalysisPrompt(performanceLog, topic, subject, examType);
+    const analysisMessages = [{ role: 'user', content: analysisPrompt }];
 
-    compressedMessages.push({
-      role: 'user',
-      content: buildAnalysisPrompt()
-    });
-
-    const responseContent = await callGroq(compressedMessages);
-
+    const { content: responseContent } = await callGroq(analysisMessages, { context: 'Analyze Viva' });
     const analysis = parseAnalysis(responseContent);
 
     res.json(analysis);
@@ -135,7 +121,7 @@ exports.summarizeTeachSession = async (req, res) => {
 
     console.log('Generating summary for topic:', topic);
 
-    const responseContent = await callGroq(summaryMessages);
+    const { content: responseContent } = await callGroq(summaryMessages, { context: 'Teach Session Summary' });
     const parsed = parseSummary(responseContent);
 
     res.json(parsed);
@@ -159,4 +145,15 @@ exports.transcribe = async (req, res) => {
     console.error('Error in transcribe:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+};
+
+// --- TOKEN STATS ENDPOINTS (for testing/monitoring) ---
+exports.getStats = (req, res) => {
+  const stats = getTokenStats();
+  res.json(stats);
+};
+
+exports.resetStats = (req, res) => {
+  resetTokenStats();
+  res.json({ message: 'Token stats reset successfully' });
 };

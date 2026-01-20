@@ -349,35 +349,42 @@ const EXAM_PROMPTS = {
   'GATE EE': SYSTEM_PROMPT_GATE_EE
 };
 
-function buildSystemPrompt(examType) {
+function buildSystemPrompt(examType, context = {}) {
   // Default to Medical / FMGE/NEET PG style if not specified (Backward Compatibility)
   if (!examType) {
     return SYSTEM_PROMPT_FMGE; // Default to FMGE/Medical style
   }
 
   const normalizedExam = examType.trim();
-  const prompt = EXAM_PROMPTS[normalizedExam];
+  let prompt = EXAM_PROMPTS[normalizedExam];
 
-  if (prompt) {
-    return prompt;
-  } else {
+  if (!prompt) {
     // If unknown exam type, default to FMGE but maybe we should log a warning
-    // For now, defaulting to FMGE/Medical behavior as fallback
-    return SYSTEM_PROMPT_FMGE;
+    prompt = SYSTEM_PROMPT_FMGE;
   }
+
+  // --- CACHE OPTIMIZATION: Include context in system prompt ---
+  // By including subject/topic in the system prompt, we maximize the cached prefix
+  // The entire system message becomes the cached portion for all turns in the session
+  if (context.subject || context.topic) {
+    prompt += `
+
+---
+SESSION CONTEXT:
+Subject: ${context.subject || 'General'}
+Topic: ${context.topic || 'General'}
+Revision Round: ${context.revisionRound || 1}
+User Revision Count: ${context.revisionCount || 0}
+---`;
+  }
+
+  return prompt;
 }
 
-function buildStartPrompt({ examType, subject, topic, revisionRound, revisionCount }) {
-  return `
-Exam Type: ${examType}
-Subject: ${subject}
-Topic: ${topic}
-Revision Round: ${revisionRound}
-User Revision Count: ${revisionCount}
-
-Begin the viva. Ask ONLY Q1 now.
-Use format: EVAL:, SUPPORT:, QUESTION:
-`;
+function buildStartPrompt() {
+  // Minimal start prompt - context is now in system message for caching
+  return `Begin the viva. Ask ONLY Q1 now.
+Use format: EVAL:, SUPPORT:, QUESTION:`;
 }
 
 function buildAnswerPrompt(userAnswer) {
@@ -390,18 +397,30 @@ CRITICAL INSTRUCTION:
 - If Q12 done → QUESTION: FINISHED.`;
 }
 
-function buildAnalysisPrompt() {
-  return `
-Provide a concise analysis in the following EXACT format:
+function buildAnalysisPrompt(performanceLog, topic, subject, examType) {
+  // Convert the JSON log to a string for the prompt
+  const logString = JSON.stringify(performanceLog, null, 2);
+
+  return `Analyze the following viva performance log for a ${examType || 'medical exam'} student.
+Topic: ${topic || 'N/A'}
+Subject: ${subject || 'N/A'}
+
+PERFORMANCE LOG (JSON):
+${logString}
+
+Each entry has: q (question number), evaluation (Correct/Incorrect/Partially Correct), userAnswer (summary), topic (sub-topic if available).
+
+Provide analysis in EXACT format:
 
 SHORT_LINES:
-- paragraph of two to three lines summarizing performance exact weak areas and strong areas strictly based on exam dynamics.
+- 2-3 line summary: overall performance, key weak areas, key strong areas.
 
 IMPROVEMENT_POINTS:
-- be direct and make these points closely related real life to exam score improvement and link it with the exam patterns and trends
+- Direct, actionable points linked to exam score improvement.
 - <point 1>
 - <point 2>
-`;
+
+OUTPUT IN PLAINTEXT ONLY. NO MARKDOWN.`;
 }
 
 
