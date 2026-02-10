@@ -10,14 +10,14 @@ const { parseResponse, parseAnalysis, parseSummary } = require('../utils/parser'
 
 exports.startViva = async (req, res) => {
   try {
-    const { examType, subject, topic, revisionRound, revisionCount } = req.body;
+    const { examType, subject, topic, revisionRound, revisionCount, teacherInstructions } = req.body;
 
     if (!examType || !subject || !topic || !revisionRound || revisionCount === undefined) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     // --- CONTEXT IN START PROMPT ---
-    const context = { subject, topic, revisionRound, revisionCount };
+    const context = { subject, topic, revisionRound, revisionCount, teacherInstructions };
 
     const messages = [];
     messages.push({ role: 'system', content: buildSystemPrompt(examType) });

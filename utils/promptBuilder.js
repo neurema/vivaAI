@@ -459,6 +459,7 @@ Subject: ${context.subject || 'General'}
 Topic: ${context.topic || 'General'}
 Revision Round: ${context.revisionRound || 1}
 User Revision Count: ${context.revisionCount || 0}
+${context.teacherInstructions ? `Teacher Instructions: ${context.teacherInstructions}` : ''}
 ---`;
   }
 
