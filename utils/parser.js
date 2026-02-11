@@ -1,6 +1,33 @@
 function parseResponse(content) {
   const raw = content.trim();
 
+  // 1. Try JSON Parsing
+  try {
+    // Extract JSON if it's wrapped in markdown code blocks
+    let jsonStr = raw;
+    const codeBlockMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1];
+    }
+
+    const parsed = JSON.parse(jsonStr);
+
+    // Validate structure (basic check)
+    if (parsed && typeof parsed === 'object') {
+      return {
+        evaluation: parsed.eval || parsed.evaluation || '',
+        support: parsed.support || '',
+        question: parsed.question || '',
+        isFinished: parsed.isFinished === true, // Ensure boolean
+        raw: raw
+      };
+    }
+  } catch (e) {
+    // JSON parsing failed, proceed to fallback
+    // console.log("JSON Parse failed, falling back to regex", e);
+  }
+
+  // 2. Fallback: Regex Parsing (Legacy)
   const evalMatch = raw.match(/^EVAL:\s*(.*)$/m);
   const evalText = evalMatch ? evalMatch[1].trim() : '';
 

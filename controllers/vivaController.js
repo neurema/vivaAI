@@ -105,6 +105,33 @@ exports.analyzeViva = async (req, res) => {
     // The client sends a compressed performanceLog instead of full chat history.
     // Format: [{ q: 1, evaluation: "Correct", topic: "...", userAnswer: "..." }, ...]
 
+    // NEW: Backward compatibility for clients sending full 'messages' history
+    if ((!performanceLog || !Array.isArray(performanceLog)) && req.body.messages && Array.isArray(req.body.messages)) {
+      const messages = req.body.messages;
+      performanceLog = [];
+      let qNum = 1;
+
+      for (let i = 0; i < messages.length; i++) {
+        const msg = messages[i];
+        // Search for User -> Assistant pairs
+        if (msg.role === 'user' && i + 1 < messages.length && messages[i + 1].role === 'assistant') {
+          const userContent = msg.content;
+          const assistantContent = messages[i + 1].content;
+
+          const parsed = parseResponse(assistantContent);
+          // Only add if there is an evaluation (skips the initial "Begin" -> "Q1" exchange)
+          if (parsed.evaluation) {
+            performanceLog.push({
+              q: qNum++,
+              evaluation: parsed.evaluation,
+              topic: topic || 'General',
+              userAnswer: userContent
+            });
+          }
+        }
+      }
+    }
+
     if (!performanceLog || !Array.isArray(performanceLog)) {
       return res.status(400).json({ error: 'Invalid input: performanceLog array required' });
     }

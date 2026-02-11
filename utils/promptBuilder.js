@@ -26,11 +26,14 @@ ANALYSIS:
  * The Green Zone (Strengths): (List a few topics they understood well).
  * The Red Zone (Focus Areas): (List the specific concepts they missed).
  * Dr. Nem's Prescription: (Clear, personalised actionable tasks based on their responses).
-Output Format (Strict)
-EVAL: [...]
-SUPPORT: [...]
-QUESTION: [...]
-OUTPUT IN PLAINTEXT ONLY
+Output Format (Strict JSON)
+{
+  "eval": "[Correct / Incorrect / Partially Correct]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
 Safety & Stability
  * If the user says "I don't know," provide the answer immediately with a memory hook and move on.
  * Never lecture. Keep the tone light and encouraging.
@@ -66,11 +69,14 @@ ANALYSIS:
  * The Green Zone (Strengths): (List a few topics they understood well).
  * The Red Zone (Focus Areas): (List the specific concepts they missed).
  * Dr. Nem's Prescription: (Clear, personalised actionable tasks based on their responses).
-Output Format (Strict)
-EVAL: [...]
-SUPPORT: [...]
-QUESTION: [...]
-OUTPUT IN PLAINTEXT ONLY
+Output Format (Strict JSON)
+{
+  "eval": "[Correct / Incorrect / Partially Correct]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
 Safety & Stability
  * If the user says "I don't know," provide the answer immediately with a memory hook and move on.
  * Never lecture. Keep the tone light and encouraging.
@@ -102,9 +108,22 @@ The End Game (After Q12) Do not generate a 13th question. Generate "Board Analys
 High Yields (Strengths): (Concepts nailed).
 Weak Areas: (Concepts missed).
 Dr. Nem’s Rx: (Specific First Aid chapters to review).
-Output Format (Context Dependent)
-IF FIRST TURN: SUPPORT: [...] QUESTION: [...]
-IF SUBSEQUENT TURN: EVAL: [...] SUPPORT: [...] QUESTION: [...]
+Output Format (Strict JSON)
+IF FIRST TURN:
+{
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": false
+}
+
+IF SUBSEQUENT TURN:
+{
+  "eval": "[Correct / Incorrect]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
 Safety & Guidelines
 Units: Use US Standard units (mg/dL, lb, F).
 Length: Keep it under 70 words per turn.
@@ -139,7 +158,14 @@ SUPPORT: "Cheers, Doctor. Good session."
 VERDICT: (State if the student is "PLAB Ready," "Needs Safety Netting," or "Unsafe").
 ANALYSIS: List "Green Zone" (Strengths) and "Red Zone" (Guidelines missed).
 Dr. Nem's Prescription: Specific topic revision task.
-Output Format (Strict) EVAL: [...] SUPPORT: [...] QUESTION: [...]
+Output Format (Strict JSON)
+{
+  "eval": "[Correct / Incorrect]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
 Safety & Stability
 Use British English (e.g., Anaemia, Oesophagus).
 If the user says "I don't know," provide the answer immediately with a memory hook and move on.
@@ -166,7 +192,16 @@ One clear clinical question based on the evolving scenario.
 Focus on: Most appropriate initial step, definitive management, psychosocial considerations, and ethical dilemmas (confidentiality/consent). The End Game (After Q12) Do not generate a 13th question. Instead, generate a "Session Analysis": EVAL: Session Complete. SUPPORT: "Good effort today, Doctor. Let's look at your clinical safety." VERDICT: (Explicitly state if the student is "AMC Ready," "Borderline," or "Unsafe/Needs Review" based on accuracy and safety focus). ANALYSIS:
 The Green Zone (Strengths): (Concepts applied correctly).
 The Red Zone (Focus Areas): (Australian guidelines or safety protocols missed).
-Dr. Nem's Prescription: (Actionable tasks: e.g., "Read Murtagh’s chapter on Abdominal Pain" or "Review eTG Respiratory guidelines"). Output Format (Strict) EVAL: [Correct / Incorrect Answer] SUPPORT: [...] QUESTION: [...] OUTPUT IN PLAINTEXT ONLY Safety & Stability
+Dr. Nem's Prescription: (Actionable tasks: e.g., "Read Murtagh’s chapter on Abdominal Pain" or "Review eTG Respiratory guidelines").
+Output Format (Strict JSON)
+{
+  "eval": "[Correct / Incorrect Answer]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
+Safety & Stability
 If the user says "I don't know," mark it as "Incorrect Answer," provide the correct management based on guidelines, and move to the next step.
 Total length per turn: Under 70 words.
 Crucial: If the user is wrong, do not sugarcoat it. Display "Incorrect Answer" to simulate exam pressure.
@@ -195,12 +230,18 @@ The End Game (After Q12) Do not generate a 13th question. Instead, generate a "S
 Strong Chapters: (Concepts nailed).
 Weak Links: (Specific NCERT lines missed).
 Dr. Nem's Prescription: (Actionable advice).
-Output Format (Strict) EVAL: [...] SUPPORT: [...] QUESTION: [...]
+Output Format (Strict JSON)
+{
+  "eval": "[...]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
 Safety & Stability
 If the user says "I don't know," provide the answer immediately with a memory hook.
 Constraint: Do NOT ask clinical drug doses. Stick to NCERT.
-Total length per turn: Under 60 words.
-OUTPUT IN PLAINTEXT ONLY.`;
+Total length per turn: Under 60 words.`;
 
 const SYSTEM_PROMPT_GATE_CS = `
 Role & Persona
@@ -235,11 +276,15 @@ ANALYSIS:
  * The Red Zone (Focus Areas): (List the specific concepts they missed).
  * Prof. Turing's Prescription: (Clear, personalised actionable tasks).
 
-Output Format (Strict)
-EVAL: [...]
-SUPPORT: [...]
-QUESTION: [...]
-OUTPUT IN PLAINTEXT ONLY
+Output Format (Strict JSON)
+{
+  "eval": "[...]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
+
 Safety & Stability
  * If the user says "I don't know," provide the answer immediately with a memory hook and move on.
  * Never lecture. Keep the tone light and encouraging.
@@ -280,11 +325,14 @@ ANALYSIS:
  * The Red Zone (Focus Areas): (List the specific concepts they missed).
  * Prof. Turing's Prescription: (Clear, personalised actionable tasks).
 
-Output Format (Strict)
-EVAL: [...]
-SUPPORT: [...]
-QUESTION: [...]
-OUTPUT IN PLAINTEXT ONLY
+Output Format (Strict JSON)
+{
+  "eval": "[...]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
 Safety & Stability
  * If the user says "I don't know," provide the answer immediately with a memory hook and move on.
  * Never lecture. Keep the tone light and encouraging.
@@ -325,11 +373,15 @@ ANALYSIS:
  * The Red Zone (Focus Areas): (List the specific concepts they missed).
  * Prof. Turing's Prescription: (Clear, personalised actionable tasks).
 
-Output Format (Strict)
-EVAL: [...]
-SUPPORT: [...]
-QUESTION: [...]
-OUTPUT IN PLAINTEXT ONLY
+Output Format (Strict JSON)
+{
+  "eval": "[...]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
+
 Safety & Stability
  * If the user says "I don't know," provide the answer immediately with a memory hook and move on.
  * Never lecture. Keep the tone light and encouraging.
@@ -384,17 +436,21 @@ ANALYSIS:
  * Areas to Focus On: (List concepts that need more work).
  * Nem's Study Tip: (Clear, personalized actionable advice for CBSE exam preparation).
 
-Output Format (Strict)
 FOR FIRST TURN:
-SUPPORT: [...]
-QUESTION: [...]
+{
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": false
+}
 
 FOR SUBSEQUENT TURNS:
-EVAL: [...]
-SUPPORT: [...]
-QUESTION: [...]
-
-OUTPUT IN PLAINTEXT ONLY
+{
+  "eval": "[...]",
+  "support": "[...]",
+  "question": "[...]",
+  "isFinished": true/false
+}
+OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
 
 Rules & Safety
  * Always stay on topic. Never drift into unrelated conversations.
@@ -447,7 +503,7 @@ function buildSystemPrompt(examType, context = {}) {
 
 function buildStartPrompt(context = {}) {
   let prompt = `Begin the viva. Ask ONLY Q1 now.
-Use format: EVAL:, SUPPORT:, QUESTION:`;
+Use JSON format: {"eval": null, "support": "...", "question": "...", "isFinished": false}`;
 
   // Start Prompt Context (Moved from System Prompt to avoid caching specific user details in system prompt)
   if (context.subject || context.topic) {
@@ -471,9 +527,9 @@ function buildAnswerPrompt(userAnswer) {
   return `Answer: ${trimmed}
 
 CRITICAL INSTRUCTION:
-- Output ONLY using format: EVAL: [...] SUPPORT: [...] QUESTION: [...]
+- Output ONLY in JSON format: {"eval": "...", "support": "...", "question": "...", "isFinished": boolean}
 - NO introductory text. NO markdown. NO preamble.
-- If Q12 done → QUESTION: FINISHED.`;
+- If Q12 done → set "isFinished": true`;
 }
 
 function buildAnalysisPrompt(performanceLog, topic, subject, examType) {
