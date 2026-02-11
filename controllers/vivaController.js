@@ -72,10 +72,25 @@ exports.answerQuestion = async (req, res) => {
     // If history is small, take it all; otherwise take last 4 items (2 turns)
     const recentHistory = rawHistory.length > 4 ? rawHistory.slice(-4) : rawHistory;
 
+    // --- PROGRESS TRACKING FIX ---
+    // Count how many questions have been asked so far to prevent infinite loops 
+    // due to sliding window context loss.
+    // Assistant messages (excluding system prompt at index 0) represent questions asked.
+    const assistantCount = groqMessages.filter(m => m.role === 'assistant').length;
+    const nextQuestionNum = assistantCount + 1;
+
+    let progressNote = `Progress Update: You are generating Question ${nextQuestionNum} of 15.`;
+    if (nextQuestionNum > 15) {
+      progressNote = `Progress Update: User has just answered Question 15. Do NOT ask Question 16. Provide evaluation/support and set "isFinished": true.`;
+    }
+
+    const progressMsg = { role: 'system', content: progressNote };
+
     // 4. Rebuild the payload for the AI
     const optimizedHistory = [
       systemMsg,
       contextMsg,
+      progressMsg,
       ...recentHistory
     ];
 
