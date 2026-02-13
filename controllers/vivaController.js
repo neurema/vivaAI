@@ -79,9 +79,9 @@ exports.answerQuestion = async (req, res) => {
     const assistantCount = groqMessages.filter(m => m.role === 'assistant').length;
     const nextQuestionNum = assistantCount + 1;
 
-    let progressNote = `Progress Update: You are generating Question ${nextQuestionNum} of 3.`;
-    if (nextQuestionNum > 3) {
-      progressNote = `Progress Update: User has just answered Question 3. Do NOT ask Question 4. Provide evaluation/support and set "isFinished": true. Set "question": null.`;
+    let progressNote = `Progress Update: You are generating Question ${nextQuestionNum} of 6.`;
+    if (nextQuestionNum > 6) {
+      progressNote = `Progress Update: User has just answered Question 6. Do NOT ask Question 7. Provide evaluation/support and set "isFinished": true. Set "question": null.`;
     }
 
     const progressMsg = { role: 'system', content: progressNote };

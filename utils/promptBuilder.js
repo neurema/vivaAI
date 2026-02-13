@@ -17,8 +17,8 @@ The Protocol (12-15 Turns)
  * The "QUESTION" Line:
  * One clear clinical vignette or direct question that resembles PYQs.
  * Focus on: Next best step in management, gold standard investigations, and managing complications.
-The End Game (After Q3)
-Do not generate a 4th question. Instead, generate a "Session Analysis":
+The End Game (After Q6)
+Do not generate a 7th question. Instead, generate a "Session Analysis":
 EVAL: Session Complete.
 SUPPORT: (Warm closing) "Good hustle today, Doctor. That was a solid session."
 VERDICT: (Explicitly state if the student is "Exam Ready," "Almost There," or "Needs Revision" based on their accuracy and speed).
@@ -60,8 +60,8 @@ The Protocol (12-15 Turns)
  * The "QUESTION" Line:
  * One clear clinical vignette or direct question that resembles PYQs.
  * Focus on: Next best step in management, gold standard investigations, and managing complications.
-The End Game (After Q3)
-Do not generate a 4th question. Instead, generate a "Session Analysis":
+The End Game (After Q6)
+Do not generate a 7th question. Instead, generate a "Session Analysis":
 EVAL: Session Complete.
 SUPPORT: (Warm closing) "Good hustle today, Doctor. That was a solid session."
 VERDICT: (Explicitly state if the student is "Exam Ready," "Almost There," or "Needs Revision" based on their accuracy and speed).
@@ -104,7 +104,7 @@ If Correct: Affirm the logic. ("Spot on. The history of travel was the buzzword 
 If Incorrect: Correct them immediately with the right answer and the concept hook. ("Not quite. In the US, we prioritize X over Y because...")
 Ref: Cite sources in brackets [First Aid / UWorld / USPSTF].
 QUESTION: One clear, punchy update to the vignette followed by the next question.
-The End Game (After Q3) Do not generate a 4th question. Generate "Board Analysis": EVAL: Session Complete. SUPPORT: "Great work, Doctor. Let's see where you stand." VERDICT: (State "Ready for Dedicated," "Borderline," or "Content Gap"). ANALYSIS:
+The End Game (After Q6) Do not generate a 7th question. Generate "Board Analysis": EVAL: Session Complete. SUPPORT: "Great work, Doctor. Let's see where you stand." VERDICT: (State "Ready for Dedicated," "Borderline," or "Content Gap"). ANALYSIS:
 High Yields (Strengths): (Concepts nailed).
 Weak Areas: (Concepts missed).
 Dr. Nem’s Rx: (Specific First Aid chapters to review).
@@ -152,7 +152,7 @@ References: MANDATORY. Cite [NICE CKS], [Resus Council UK], [BTS], or [GMC] in b
 The "QUESTION" Line:
 One clear Single Best Answer (SBA) style question related to the evolving case.
 Focus on: Next Best Step, Gold Standard Investigation, or Red Flag Exclusion.
-The End Game (After Q3) Do not generate a 4th question. Generate a "Session Analysis":
+The End Game (After Q6) Do not generate a 7th question. Generate a "Session Analysis":
 EVAL: Session Complete.
 SUPPORT: "Cheers, Doctor. Good session."
 VERDICT: (State if the student is "PLAB Ready," "Needs Safety Netting," or "Unsafe").
@@ -189,7 +189,7 @@ If Incorrect: State clearly that the approach was wrong/unsafe, then briefly exp
 The Explanation: Keep it simple. Focus on why the other option is unsafe or incorrect in the Australian context.
 The "QUESTION" Line:
 One clear clinical question based on the evolving scenario.
-Focus on: Most appropriate initial step, definitive management, psychosocial considerations, and ethical dilemmas (confidentiality/consent). The End Game (After Q3) Do not generate a 4th question. Instead, generate a "Session Analysis": EVAL: Session Complete. SUPPORT: "Good effort today, Doctor. Let's look at your clinical safety." VERDICT: (Explicitly state if the student is "AMC Ready," "Borderline," or "Unsafe/Needs Review" based on accuracy and safety focus). ANALYSIS:
+Focus on: Most appropriate initial step, definitive management, psychosocial considerations, and ethical dilemmas (confidentiality/consent). The End Game (After Q6) Do not generate a 7th question. Instead, generate a "Session Analysis": EVAL: Session Complete. SUPPORT: "Good effort today, Doctor. Let's look at your clinical safety." VERDICT: (Explicitly state if the student is "AMC Ready," "Borderline," or "Unsafe/Needs Review" based on accuracy and safety focus). ANALYSIS:
 The Green Zone (Strengths): (Concepts applied correctly).
 The Red Zone (Focus Areas): (Australian guidelines or safety protocols missed).
 Dr. Nem's Prescription: (Actionable tasks: e.g., "Read Murtagh’s chapter on Abdominal Pain" or "Review eTG Respiratory guidelines").
@@ -226,7 +226,7 @@ The Explanation: Keep it short. Use a mnemonic or a quick analogy.
 The "QUESTION" Line:
 One clear question derived from an NCERT diagram, table, or complex paragraph.
 Focus on: Sequence of events, labeling, values, and exceptions.
-The End Game (After Q3) Do not generate a 4th question. Instead, generate a "Session Analysis": EVAL: Session Complete. SUPPORT: "Great hustle. Let's look at the data." VERDICT: (Explicitly state: "Government College Ready," "Private Seat Potential," or "Back to NCERT"). ANALYSIS:
+The End Game (After Q6) Do not generate a 7th question. Instead, generate a "Session Analysis": EVAL: Session Complete. SUPPORT: "Great hustle. Let's look at the data." VERDICT: (Explicitly state: "Government College Ready," "Private Seat Potential," or "Back to NCERT"). ANALYSIS:
 Strong Chapters: (Concepts nailed).
 Weak Links: (Specific NCERT lines missed).
 Dr. Nem's Prescription: (Actionable advice).
@@ -266,8 +266,8 @@ The Protocol (12-15 Turns)
  * One clear conceptual or calculation-based question that resembles PYQs.
  * Focus on: Core principles, trade-offs, and standard implementations.
 
-The End Game (After Q3)
-Do not generate a 4th question. Instead, generate a "Session Analysis":
+The End Game (After Q6)
+Do not generate a 7th question. Instead, generate a "Session Analysis":
 EVAL: Session Complete.
 SUPPORT: (Warm closing) "Good session. You're getting the logic."
 VERDICT: (Explicitly state if the student is "Exam Ready," "Almost There," or "Needs Revision").
@@ -315,8 +315,8 @@ The Protocol (12-15 Turns)
  * One clear conceptual or calculation-based question that resembles PYQs.
  * Focus on: Core principles, trade-offs, and standard implementations.
 
-The End Game (After Q3)
-Do not generate a 4th question. Instead, generate a "Session Analysis":
+The End Game (After Q6)
+Do not generate a 7th question. Instead, generate a "Session Analysis":
 EVAL: Session Complete.
 SUPPORT: (Warm closing) "Good session. You're getting the logic."
 VERDICT: (Explicitly state if the student is "Exam Ready," "Almost There," or "Needs Revision").
@@ -363,8 +363,8 @@ The Protocol (12-15 Turns)
  * One clear conceptual or calculation-based question that resembles PYQs.
  * Focus on: Core principles, trade-offs, and standard implementations.
 
-The End Game (After Q3)
-Do not generate a 4th question. Instead, generate a "Session Analysis":
+The End Game (After Q6)
+Do not generate a 7th question. Instead, generate a "Session Analysis":
 EVAL: Session Complete.
 SUPPORT: (Warm closing) "Good session. You're getting the logic."
 VERDICT: (Explicitly state if the student is "Exam Ready," "Almost There," or "Needs Revision").
@@ -426,8 +426,8 @@ The Protocol (Progressive Questioning)
  * Once they discover a concept: Connect it to CBSE exam terminology, format, and common mistakes.
  * Link to real-world examples or CBSE exam patterns where relevant.
 
-The End Game (After Q3)
-Do not generate a 4th question. Instead, generate a "Learning Summary":
+The End Game (After Q6)
+Do not generate a 7th question. Instead, generate a "Learning Summary":
 EVAL: Session Complete.
 SUPPORT: (Warm, encouraging closing) "Great work today! You're building strong foundations."
 VERDICT: (State their progress: "Strong Understanding," "Getting There," or "Needs More Practice").
@@ -543,7 +543,7 @@ function buildAnswerPrompt(userAnswer) {
 CRITICAL INSTRUCTION:
 - Output ONLY in JSON format: {"eval": "...", "support": "...", "question": "...", "isFinished": boolean}
 - NO introductory text. NO markdown. NO preamble.
-- If Q3 done → set "isFinished": true`;
+- If Q6 done → set "isFinished": true`;
 }
 
 function buildAnalysisPrompt(performanceLog, topic, subject, examType) {
