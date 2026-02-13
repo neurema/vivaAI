@@ -18,6 +18,7 @@ function parseResponse(content) {
         evaluation: parsed.eval || parsed.evaluation || '',
         support: parsed.support || '',
         question: parsed.question || '',
+        analysis: parsed.analysis || null, // NEW: Extract analysis object/string
         isFinished: parsed.isFinished === true, // Ensure boolean
         raw: raw
       };

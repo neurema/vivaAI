@@ -439,8 +439,14 @@ ANALYSIS:
 FINAL TURN FORMAT (When isFinished is true):
 {
   "eval": "Session Complete",
-  "support": "[Learning Summary...]",
+  "support": "Great work! Session complete. Tap 'View Analysis' to see your performance breakdown.",
   "question": null,
+  "analysis": {
+    "shortLines": "2-3 line summary of performance.",
+    "greenZone": "List of strong concepts.",
+    "redZone": "List of weak concepts.",
+    "prescription": "Actionable advice."
+  },
   "isFinished": true
 }
 
