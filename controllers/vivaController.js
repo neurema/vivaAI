@@ -114,7 +114,8 @@ exports.answerQuestion = async (req, res) => {
 
 exports.analyzeViva = async (req, res) => {
   try {
-    const { performanceLog, topic, subject, examType } = req.body;
+    let { performanceLog } = req.body;
+    const { topic, subject, examType } = req.body;
 
     // --- DUAL-HISTORY STRATEGY: Metadata Log Analysis ---
     // The client sends a compressed performanceLog instead of full chat history.
