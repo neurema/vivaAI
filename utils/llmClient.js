@@ -3,16 +3,17 @@ const FormData = require('form-data');
 require('dotenv').config();
 
 // --- CONFIGURATION ---
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const TEXT_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct';
+// --- CONFIGURATION ---
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const TEXT_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 const GROQ_AUDIO_URL = 'https://api.groq.com/openai/v1/audio/transcriptions';
 const AUDIO_MODEL = 'whisper-large-v3-turbo';
 
 // --- PRICING CONFIGURATION (per million tokens) ---
-// Approximate pricing for common models on OpenRouter
+// Approximate pricing for common models on Groq (often free or very low cost for Llama 3)
 const MODEL_PRICING = {
-    'meta-llama/llama-3.3-70b-instruct': { input: 0.1, output: 0.1 }, // Example pricing
+    'llama-3.3-70b-versatile': { input: 0.59, output: 0.79 }, // Example pricing (Consult Groq pricing)
     'default': { input: 0.1, output: 0.1 }
 };
 
@@ -32,7 +33,7 @@ function calculateCost(promptTokens, completionTokens) {
 }
 
 // API KEYS
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+// GROQ_API_KEYS should be a comma-separated list of keys in .env
 const GROQ_API_KEYS = (process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || '')
     .split(/[\s,]+/)
     .map((key) => key.trim())
@@ -42,7 +43,7 @@ let currentGroqKeyIndex = 0;
 
 function getNextGroqKey() {
     if (GROQ_API_KEYS.length === 0) {
-        throw new Error('GROQ_API_KEY or GROQ_API_KEYS must be set for audio transcription');
+        throw new Error('GROQ_API_KEY or GROQ_API_KEYS must be set');
     }
     currentGroqKeyIndex = (currentGroqKeyIndex + 1) % GROQ_API_KEYS.length;
     return { apiKey: GROQ_API_KEYS[currentGroqKeyIndex], index: currentGroqKeyIndex };
@@ -100,51 +101,59 @@ function logTokenUsage(context, usage, durationMs = 0) {
 // --- MAIN FUNCTIONS ---
 
 async function callLLM(messages, options = {}) {
-    if (!OPENROUTER_API_KEY) {
-        throw new Error('OPENROUTER_API_KEY must be set in environment variables');
+    if (GROQ_API_KEYS.length === 0) {
+        throw new Error('GROQ_API_KEYS must be set in environment variables');
     }
 
     const { temperature = 0.6, context = 'API Call' } = options;
+    let lastError;
+    const totalKeys = GROQ_API_KEYS.length;
 
-    try {
-        const startTime = Date.now();
-        console.log(`🤖 Calling OpenRouter (${TEXT_MODEL})...`);
+    // Retry mechanism across keys
+    for (let attempt = 0; attempt < totalKeys; attempt++) {
+        const { apiKey, index } = getNextGroqKey();
 
-        const response = await axios.post(
-            OPENROUTER_API_URL,
-            {
-                model: TEXT_MODEL,
-                messages: messages,
-                temperature: temperature,
-                // Optional: Add more OpenRouter specific headers or body params here if needed
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                    'HTTP-Referer': 'https://neurema.com', // Optional, required by OpenRouter for rankings
-                    'X-Title': 'VivaAI', // Optional
+        try {
+            console.log(`🤖 Calling Groq (${TEXT_MODEL}) with key index ${index}...`);
+            const startTime = Date.now();
+
+            const response = await axios.post(
+                GROQ_API_URL,
+                {
+                    model: TEXT_MODEL,
+                    messages: messages,
+                    temperature: temperature,
                 },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                    },
+                }
+            );
+
+            const durationMs = Date.now() - startTime;
+
+            if (response.data && response.data.choices && response.data.choices.length > 0) {
+                const content = response.data.choices[0].message.content || '';
+                const usage = response.data.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+
+                logTokenUsage(context, usage, durationMs);
+                return { content, usage };
             }
-        );
 
-        const durationMs = Date.now() - startTime;
+            throw new Error('No content received from Groq API');
 
-        if (response.data && response.data.choices && response.data.choices.length > 0) {
-            const content = response.data.choices[0].message.content || '';
-            const usage = response.data.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-
-            logTokenUsage(context, usage, durationMs);
-            return { content, usage };
+        } catch (error) {
+            lastError = error;
+            const errorMessage = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+            console.error(`❌ Error calling Groq API with key index ${index}:`, errorMessage);
+            // Continue to next key
         }
-
-        throw new Error('No content received from OpenRouter API');
-
-    } catch (error) {
-        const errorMessage = error.response?.data ? JSON.stringify(error.response.data) : error.message;
-        console.error(`❌ Error calling OpenRouter API:`, errorMessage);
-        throw error;
     }
+
+    // If all keys failed
+    throw lastError || new Error('Failed to call LLM with all configured keys');
 }
 
 async function transcribeAudio(buffer, filename) {
