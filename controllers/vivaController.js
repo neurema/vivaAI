@@ -81,7 +81,7 @@ exports.answerQuestion = async (req, res) => {
 
     let progressNote = `Progress Update: You are generating Question ${nextQuestionNum} of 3.`;
     if (nextQuestionNum > 3) {
-      progressNote = `Progress Update: User has just answered Question 3. Do NOT ask Question 4. Provide evaluation/support and set "isFinished": true.`;
+      progressNote = `Progress Update: User has just answered Question 3. Do NOT ask Question 4. Provide evaluation/support and set "isFinished": true. Set "question": null.`;
     }
 
     const progressMsg = { role: 'system', content: progressNote };

@@ -435,6 +435,14 @@ ANALYSIS:
  * Concepts You've Mastered: (List topics they understood well).
  * Areas to Focus On: (List concepts that need more work).
  * Nem's Study Tip: (Clear, personalized actionable advice for CBSE exam preparation).
+ 
+FINAL TURN FORMAT (When isFinished is true):
+{
+  "eval": "Session Complete",
+  "support": "[Learning Summary...]",
+  "question": null,
+  "isFinished": true
+}
 
 FOR FIRST TURN:
 {
@@ -443,12 +451,12 @@ FOR FIRST TURN:
   "isFinished": false
 }
 
-FOR SUBSEQUENT TURNS:
+FOR SUBSEQUENT TURNS (When isFinished is false):
 {
   "eval": "[...]",
   "support": "[...]",
   "question": "[...]",
-  "isFinished": true/false
+  "isFinished": false
 }
 OUTPUT IN STRICT JSON FORMAT ONLY. NO MARKDOWN. NO CODE BLOCKS.
 
