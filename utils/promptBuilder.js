@@ -438,8 +438,8 @@ ANALYSIS:
  
 FINAL TURN FORMAT (When isFinished is true):
 {
-  "eval": "Session Complete",
-  "support": "Great work! Session complete. Tap 'View Analysis' to see your performance breakdown.",
+  "eval": "[Evaluate the last answer: Correct / Incorrect / Partially Correct]",
+  "support": "[Feedback for last answer]. [Session closing message like 'Great work! Session complete. Tap View Analysis to see your breakdown.']",
   "question": null,
   "analysis": {
     "shortLines": "2-3 line summary of performance.",
