@@ -80,7 +80,7 @@ exports.answerQuestion = async (req, res) => {
     const nextQuestionNum = assistantCount + 1;
 
     let progressNote = `Progress Update: You are generating Question ${nextQuestionNum} of 15.`;
-    if (nextQuestionNum > 15) {
+    if (nextQuestionNum > 3) {
       progressNote = `Progress Update: User has just answered Question 15. Do NOT ask Question 16. Provide evaluation/support and set "isFinished": true.`;
     }
 
