@@ -10,14 +10,14 @@ const { parseResponse, parseAnalysis, parseSummary } = require('../utils/parser'
 
 exports.startViva = async (req, res) => {
   try {
-    const { examType, subject, topic, revisionRound, revisionCount, teacherInstructions } = req.body;
+    const { examType, subject, topic, revisionRound, revisionCount, teacherInstructions, questionCount } = req.body;
 
     if (!examType || !subject || !topic || !revisionRound || revisionCount === undefined) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     // --- CONTEXT IN START PROMPT ---
-    const context = { subject, topic, revisionRound, revisionCount, teacherInstructions };
+    const context = { subject, topic, revisionRound, revisionCount, teacherInstructions, questionCount };
 
     const messages = [];
     messages.push({ role: 'system', content: buildSystemPrompt(examType) });
@@ -44,7 +44,7 @@ exports.startViva = async (req, res) => {
 
 exports.answerQuestion = async (req, res) => {
   try {
-    const { messages, userAnswer } = req.body;
+    const { messages, userAnswer, questionCount } = req.body;
 
     if (!messages || !Array.isArray(messages) || userAnswer === undefined) {
       return res.status(400).json({ error: 'Invalid input: messages array and userAnswer required' });
@@ -56,7 +56,7 @@ exports.answerQuestion = async (req, res) => {
     const groqMessages = [...messages];
     groqMessages.push({
       role: 'user',
-      content: buildAnswerPrompt(userAnswer)
+      content: buildAnswerPrompt(userAnswer, questionCount)
     });
 
     // --- SLIDING WINDOW FIX ---
@@ -79,9 +79,10 @@ exports.answerQuestion = async (req, res) => {
     const assistantCount = groqMessages.filter(m => m.role === 'assistant').length;
     const nextQuestionNum = assistantCount + 1;
 
-    let progressNote = `Progress Update: You are generating Question ${nextQuestionNum} of 6.`;
-    if (nextQuestionNum > 6) {
-      progressNote = `Progress Update: User has just answered Question 6. Do NOT ask Question 7. Provide evaluation/support and set "isFinished": true. Set "question": null.`;
+    const maxQuestions = questionCount || 6;
+    let progressNote = `Progress Update: You are generating Question ${nextQuestionNum} of ${maxQuestions}.`;
+    if (nextQuestionNum > maxQuestions) {
+      progressNote = `Progress Update: User has just answered Question ${maxQuestions}. Do NOT ask Question ${maxQuestions + 1}. Provide evaluation/support and set "isFinished": true. Set "question": null.`;
     }
 
     const progressMsg = { role: 'system', content: progressNote };
